@@ -37,7 +37,7 @@ def creat_player():  # 创建玩家
             try:
                 # 使用int转换输入为整数，并验证范围，避免使用eval的安全风险
                 difficulty = int(input(f"请输入你选择的难度(1-{len(dif_list)}):"))
-                if 1 <= difficulty <= 3:
+                if 1 <= difficulty <= 5:
                     break
                 else:
                     print("你输入的数值不在有效范围内，请重新输入!")

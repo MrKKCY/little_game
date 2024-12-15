@@ -57,13 +57,13 @@ def creat_player():  # 创建玩家
 
 
 class Player(object):  # 玩家类，用于创建玩家对象
-    def __init__(self, name, HP, Attack, Experience=0):  # init 初始化玩家信息函数
+    def __init__(self, name, HP, Attack, money=0):  # init 初始化玩家信息函数
         self.name = name
         self.HP = HP
         self.Attack = Attack
-        self.Experience = Experience
+        self.money = money
 
-    def talk(self, Monster, talks):  # 对话系统:支持导入字典进行对话
+    def talk(self, zombie, talks):  # 对话系统:支持导入字典进行对话
         """
         此处计划使用json存储对话来实现更丰富的对话功能，目前暂未完整实现，仅预留接口。
         """
@@ -75,44 +75,65 @@ class Player(object):  # 玩家类，用于创建玩家对象
         print(self.name + " 对 " + target.name + " 造成了 " + str(damage) + " 点伤害！")
         time.sleep(0.5)
 
-    def fight(self, monster):  # 战斗函数
+    def fight(self, zombie):  # 战斗函数
         """
-        实现玩家与怪物的战斗逻辑，采用回合制战斗，直到一方血量小于等于0为止。
+        实现玩家与丧尸的战斗逻辑，采用回合制战斗，直到一方血量小于等于0为止。
         战斗结束后，玩家的血量不会恢复，而是保持战斗结束时的状态。
         """
-        while self.HP > 0 and monster.HP > 0:
+        while self.HP > 0 and zombie.HP > 0:
             # 玩家回合逻辑
-            self.attack(monster)
-            if monster.HP <= 0:
+            self.attack(zombie)
+            if zombie.HP <= 0:
+                give_money = random.randint(zombie.money[0], zombie.money[1])
                 print(self.name + " 胜利了！")
-                self.Experience += monster.Experience  # 玩家胜利后增加经验值
-                print("恭喜你，击败了怪物！")
+                print("恭喜你，击败了丧尸！")
                 time.sleep(0.5)
-                print("你获取了 " + str(monster.Experience) + " 点经验值！")
+                if self.money is not None:
+                    self.money += give_money  # 玩家胜利后增加的金币
+                    print("你从丧尸身上收集到了 " + str(give_money) + " 点金币")
+                else:
+                    print(f"{self.name}:可恶，这只丧尸怎么什么都没有!")
                 time.sleep(0.5)
                 print("剩余血量：" + str(self.HP) + " 点")
                 break
-            # 怪物回合逻辑
-            monster.attack(self)
+            # 丧尸回合逻辑
+            zombie.attack(self)
             if self.HP <= 0:
-                print(monster.name + " 胜利了！")
+                print(zombie.name + " 胜利了！")
                 time.sleep(0.5)
-                print(f"{monster.name}:你真弱啊,桀桀桀!")
-                time.sleep(0.5)
-                print("很可惜，你被怪物击败了！")
+                print("很可惜，你被丧尸击败了！")
                 break
+    
+    def command(self, command=0):  # 命令函数
+        """
+        实现玩家的命令执行逻辑，目前只支持简单的移动命令。
+        后续可以在此基础上添加更多命令，如攻击、使用物品等。
+        """
+        if command == "1":
+            print(5*"="+"玩家属性"+5*"=")
+            print(f"玩家名称: {self.name}")
+            print(f"玩家血量: {self.HP}")
+            print(f"玩家攻击力: {self.Attack}")
+            print(f"玩家金币: {self.money}")
+            print(15*"=")
+            time.sleep(0.5)
+        else:
+            print("继续前进...")
+            return 0
+
+                
 
 
-class Monster(object):  # 怪物类，用于创建怪物对象
-    def __init__(self, name, HP, Attack, Experience):  # init 初始化怪物信息函数
+class Zombie(object):  # 丧尸类，用于创建丧尸对象
+    def __init__(self, name, HP, Attack, money):  # init 初始化丧尸信息函数
         self.name = name
         self.HP = HP
         self.Attack = Attack
-        self.Experience = Experience
+        self.money = money
 
     def attack(self, target):
         """
-        怪物攻击目标（比如玩家）的方法，目前简单地用怪物的攻击力对目标造成伤害。
+        丧尸攻击目标（比如玩家）的方法，目前简单地用丧尸的攻击力对目标造成伤害。
         后续可以在此基础上添加更多复杂逻辑，如暴击、特殊效果等。
         """
         damage = self.Attack
@@ -120,23 +141,81 @@ class Monster(object):  # 怪物类，用于创建怪物对象
         print(self.name + " 对 " + target.name + " 造成了 " + str(damage) + " 点伤害！")
         time.sleep(0.5)
 
+class Merchant(object):  # 商人类，用于创建商人对象
+    def __init__(self):  # init 初始化商人信息函数
+        self.name = "约翰·乔姆"
+        self.meeting = False  # 商人是否与玩家相遇的标志
+
+    def trade(self, player):
+        if self.meeting is False:
+            print(f"{self.name}:嘿！小子，没错就是你！过来！我是{self.name}，我是一名商人。")
+            self.meeting = True
+            time.sleep(1)
+            terminal.debug_out(f"玩家与商人相遇", Debug_mod)
+            print(f"{self.name}:你有点面生啊，我在废土这么久第一次见到你。")
+            time.sleep(1)
+            print(f"{self.name}:来看看有没有你需要的东西。")
+        else:
+            print(f"{self.name}:嘿！小子又是我，{self.name}。")
+            time.sleep(1)
+            print(f"{self.name}:我最近进了一些新货，你想要看看吗？")
+
+        buy = input("你想要买什么？[Y/N]:")
+        if buy == "Y":
+            print(f"{self.name}:你想要买什么？")
+            time.sleep(1)
+            print(f"{self.name}:1.可乐 2.饼干")
+            commodity = {
+                "cola": ["可乐", 35, 20],
+                "cookie": ["饼干", 40, 5],
+            }
+            time.sleep(1)
+            choice = input("请输入你的选择：")
+            if choice == "1":
+                if player.money >= commodity["cola"][1]:
+                    print(f"{self.name}:{commodity['cola'][0]}的价格是{commodity['cola'][1]}金币")
+                    time.sleep(1)
+                    player.HP += commodity['cola'][2]  # 玩家血量增加
+                    player.money -= commodity['cola'][1]
+                    print(f"你购买了{commodity['cola'][0]}，现在你的血量是{player.HP}")
+                    print(f"{self.name}:欢迎下次光临。")
+                    return 0
+                else:
+                    print(f"{self.name}:你的钱不够，等够钱了再来买吧。")
+                    return 0
+            elif choice == "2":
+                if player.money >= commodity["cookie"][1]:
+                    print(f"{self.name}:{commodity['cookie'][0]}的价格是{commodity['cookie'][1]}金币")
+                    time.sleep(1)
+                    player.Attack += commodity['cookie'][2]  # 玩家攻击力增加
+                    player.money -= commodity['cookie'][1]
+                    print(f"你购买了{commodity['cookie'][0]}，现在你的攻击力是{player.Attack}")
+                    print(f"{selfe.name}:欢迎下次光临。")
+                    return 0
+                else:
+                    print(f"{self.name}:你的钱不够，等够钱了再来买吧。")
+                    return 0
+        else:
+            print(f"{self.name}:好吧，下次再来吧。")
+            return 0
+
 
 def random_events(player):  # 根据概率给行动分配随机事件
-    def encounter_monster():  # 随机怪物函数
-        monsters={
-            1:["哥布林","可恶的",[20,5,10]],
-            2:["史莱姆","黏糊糊的",[15,3,5]],
-            3:["狼","凶猛的",[25,10,15]],
-            4:["强壮哥布林","可怕的",[25,10,15]],
+    def encounter_zombie():  # 随机丧尸函数
+        zombies={
+            1:["普通丧尸","漫无目游荡的",[20,5,(3,15)]],
+            2:["半身丧尸","正在爬行的",[15,3,(0,10)]],
+            3:["变异犬","凶猛的",[25,10,(0,5)]],
+            4:["肥胖丧尸","健硕的",[50,15,(5,30)]],
         }
-        num = random.randint(1, len(monsters))
-        print(f"遇到了一只{(monsters[num])[1]}{(monsters[num])[0]}")
-        fight = input("你想和他战斗吗?[Y/N]:")
+        num = random.randint(1, len(zombies))
+        print(f"遇到了一只{(zombies[num])[1]}{(zombies[num])[0]}")
+        fight = input("你希望和他战斗吗?[Y/N]:")
         if fight == "Y":
             print("你选择了战斗...")
             time.sleep(1)
-            monster = Monster((monsters[num])[0],((monsters[num])[2])[0],((monsters[num])[2])[1],((monsters[num])[2])[2])
-            player.fight(monster)
+            zombie = Zombie((zombies[num])[0],((zombies[num])[2])[0],((zombies[num])[2])[1],((zombies[num])[2])[2])
+            player.fight(zombie)
         else:
             print("你选择了逃跑...")
             time.sleep(1)
@@ -146,51 +225,56 @@ def random_events(player):  # 根据概率给行动分配随机事件
     class TreasureBox:  # 宝箱类,用于生成随机事件
         def __init__(self):
             self.items = {
-                "health_potion":0.35, 
-                "damage_potion":0.15, 
+                "cola":0.35, 
+                "cookie":0.15, 
                 "noting":0.5
                 }
 
         def open(self):
             return random.random()
 
-    def open_treasure_box(player):  # 打开宝箱函数
+    def open_treasure_box(player):  # 打开物资箱函数
         treasure_box = TreasureBox()
         item = treasure_box.open()
         
-        if item < treasure_box.items["health_potion"]:
-            print("宝箱打开了...")
-            print("恭喜你获得了一个恢复药瓶！")
+        if item < treasure_box.items["cola"]:
+            print("物资箱打开了...")
+            print("恭喜你获得了一个神奇的可乐！")
             player.HP += 20
             print(f"{player.name} 的生命值增加 20 点。")
-        elif item < treasure_box.items["health_potion"] + treasure_box.items["damage_potion"]:
-            print("宝箱打开了...")
-            print("恭喜你获得了一个攻击力药水！")
+        elif item < treasure_box.items["cola"] + treasure_box.items["cookie"]:
+            print("物资箱打开了...")
+            print("恭喜你获得了一个饼干！")
             player.Attack += 5
             print(f"{player.name} 的攻击力永久增加 5 点。")
         else:
-            print("宝箱打开了...")
-            print("很遗憾，宝箱是空的。")
+            print("物资箱打开了...")
+            print("很遗憾，物资箱是空的。")
 
     event_probability = {
-        "encounter_monster": 0.3,
-        "Nothing": 0.5,
-        "encounter_chest": 0.2
+        "encounter_zombie": 0.20,
+        "Nothing": 0.48,
+        "encounter_chest": 0.12,
+        "merchant":0.20
     }
     random_number = random.random()
     cumulative_probability = 0
     for event, probability in event_probability.items():  # 索引查看时间和概率
         cumulative_probability += probability
         if random_number < cumulative_probability:
-            if event == "encounter_monster":
-                encounter_monster()
+            if event == "encounter_zombie":
+                encounter_zombie()
             elif event == "Nothing":
                 print("无事发生呢..\n继续向前走...")
                 time.sleep(4)
             elif event == "encounter_chest":
-                print("发现了一个神秘的宝箱！")
+                print("发现了一个神秘的物资箱！")
                 open_treasure_box(player)
                 time.sleep(2)
+            elif event == "merchant":
+                print("遇到了一个商人...")
+                merchant = Merchant()
+                merchant.trade(player)
             break
 
 
@@ -214,7 +298,11 @@ def main():  #主函数
         if player.HP <= 0:
             print("游戏结束！")
             break
-        input("按回车键继续前进...")
+        try:
+            command = input("请输入你的命令(1:查看属性):")
+            player.command(command)
+        except ValueError:
+            print("输入错误，请重新输入！")
 
 
 if __name__ == "__main__":  # 是否为主入口程序文件判定

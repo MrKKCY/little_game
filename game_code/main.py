@@ -1,9 +1,13 @@
 import time
 import random
 import terminal
+from entity import Player, Zombie, Merchant # type: ignore
+import json
 
-Debug_mod = False
-
+with open("config.json", "r") as config_file:
+    config = json.load(config_file)
+    Debug_mod = config["debug"]
+    read_tutorial_mod = config["read_tutorial"]
 
 def creat_player():  # 创建玩家
     """
@@ -20,6 +24,8 @@ def creat_player():  # 创建玩家
             "1.简单难度:血量50，攻击力15",
             "2.普通难度:血量35，攻击力10",
             "3.困难难度:血量25，攻击力5",
+            "4.噩梦难度:血量10，攻击力5",
+            "5.职高厕所难度:血量5，攻击力1"
         ]
         print("难度等级划分如下:")
         time.sleep(0.2)
@@ -30,7 +36,7 @@ def creat_player():  # 创建玩家
         while True:
             try:
                 # 使用int转换输入为整数，并验证范围，避免使用eval的安全风险
-                difficulty = int(input("请输入你选择的难度(1-3):"))
+                difficulty = int(input(f"请输入你选择的难度(1-{len(dif_list)}):"))
                 if 1 <= difficulty <= 3:
                     break
                 else:
@@ -41,7 +47,9 @@ def creat_player():  # 创建玩家
         dif = {
             1: [50, 15],
             2: [35, 10],
-            3: [25, 5]
+            3: [25, 5],
+            4: [10, 5],
+            5: [5, 1]
         }
         terminal.debug_out(f"设置难度:{difficulty}", Debug_mod)
         return dif[difficulty]
@@ -54,150 +62,6 @@ def creat_player():  # 创建玩家
     terminal.debug_out(f"初始攻击力:{atk}", Debug_mod)
 
     return Player(name, hp, atk)  # 传参基础数据并创建玩家对象
-
-
-class Player(object):  # 玩家类，用于创建玩家对象
-    def __init__(self, name, HP, Attack, money=0):  # init 初始化玩家信息函数
-        self.name = name
-        self.HP = HP
-        self.Attack = Attack
-        self.money = money
-
-    def talk(self, zombie, talks):  # 对话系统:支持导入字典进行对话
-        """
-        此处计划使用json存储对话来实现更丰富的对话功能，目前暂未完整实现，仅预留接口。
-        """
-        pass
-
-    def attack(self, target):  
-        damage = self.Attack  # 可以在这里添加更多计算伤害的逻辑，比如考虑暴击、属性克制等情况，目前先简单用攻击力作为伤害值
-        target.HP -= damage
-        print(self.name + " 对 " + target.name + " 造成了 " + str(damage) + " 点伤害！")
-        time.sleep(0.5)
-
-    def fight(self, zombie):  # 战斗函数
-        """
-        实现玩家与丧尸的战斗逻辑，采用回合制战斗，直到一方血量小于等于0为止。
-        战斗结束后，玩家的血量不会恢复，而是保持战斗结束时的状态。
-        """
-        while self.HP > 0 and zombie.HP > 0:
-            # 玩家回合逻辑
-            self.attack(zombie)
-            if zombie.HP <= 0:
-                give_money = random.randint(zombie.money[0], zombie.money[1])
-                print(self.name + " 胜利了！")
-                print("恭喜你，击败了丧尸！")
-                time.sleep(0.5)
-                if self.money is not None:
-                    self.money += give_money  # 玩家胜利后增加的金币
-                    print("你从丧尸身上收集到了 " + str(give_money) + " 点金币")
-                else:
-                    print(f"{self.name}:可恶，这只丧尸怎么什么都没有!")
-                time.sleep(0.5)
-                print("剩余血量：" + str(self.HP) + " 点")
-                break
-            # 丧尸回合逻辑
-            zombie.attack(self)
-            if self.HP <= 0:
-                print(zombie.name + " 胜利了！")
-                time.sleep(0.5)
-                print("很可惜，你被丧尸击败了！")
-                break
-    
-    def command(self, command=0):  # 命令函数
-        """
-        实现玩家的命令执行逻辑，目前只支持简单的移动命令。
-        后续可以在此基础上添加更多命令，如攻击、使用物品等。
-        """
-        if command == "1":
-            print(5*"="+"玩家属性"+5*"=")
-            print(f"玩家名称: {self.name}")
-            print(f"玩家血量: {self.HP}")
-            print(f"玩家攻击力: {self.Attack}")
-            print(f"玩家金币: {self.money}")
-            print(15*"=")
-            time.sleep(0.5)
-        else:
-            print("继续前进...")
-            return 0
-
-                
-
-
-class Zombie(object):  # 丧尸类，用于创建丧尸对象
-    def __init__(self, name, HP, Attack, money):  # init 初始化丧尸信息函数
-        self.name = name
-        self.HP = HP
-        self.Attack = Attack
-        self.money = money
-
-    def attack(self, target):
-        """
-        丧尸攻击目标（比如玩家）的方法，目前简单地用丧尸的攻击力对目标造成伤害。
-        后续可以在此基础上添加更多复杂逻辑，如暴击、特殊效果等。
-        """
-        damage = self.Attack
-        target.HP -= damage
-        print(self.name + " 对 " + target.name + " 造成了 " + str(damage) + " 点伤害！")
-        time.sleep(0.5)
-
-class Merchant(object):  # 商人类，用于创建商人对象
-    def __init__(self):  # init 初始化商人信息函数
-        self.name = "约翰·乔姆"
-        self.meeting = False  # 商人是否与玩家相遇的标志
-
-    def trade(self, player):
-        if self.meeting is False:
-            print(f"{self.name}:嘿！小子，没错就是你！过来！我是{self.name}，我是一名商人。")
-            self.meeting = True
-            time.sleep(1)
-            terminal.debug_out(f"玩家与商人相遇", Debug_mod)
-            print(f"{self.name}:你有点面生啊，我在废土这么久第一次见到你。")
-            time.sleep(1)
-            print(f"{self.name}:来看看有没有你需要的东西。")
-        else:
-            print(f"{self.name}:嘿！小子又是我，{self.name}。")
-            time.sleep(1)
-            print(f"{self.name}:我最近进了一些新货，你想要看看吗？")
-
-        buy = input("你想要买什么？[Y/N]:")
-        if buy == "Y":
-            print(f"{self.name}:你想要买什么？")
-            time.sleep(1)
-            print(f"{self.name}:1.可乐 2.饼干")
-            commodity = {
-                "cola": ["可乐", 35, 20],
-                "cookie": ["饼干", 40, 5],
-            }
-            time.sleep(1)
-            choice = input("请输入你的选择：")
-            if choice == "1":
-                if player.money >= commodity["cola"][1]:
-                    print(f"{self.name}:{commodity['cola'][0]}的价格是{commodity['cola'][1]}金币")
-                    time.sleep(1)
-                    player.HP += commodity['cola'][2]  # 玩家血量增加
-                    player.money -= commodity['cola'][1]
-                    print(f"你购买了{commodity['cola'][0]}，现在你的血量是{player.HP}")
-                    print(f"{self.name}:欢迎下次光临。")
-                    return 0
-                else:
-                    print(f"{self.name}:你的钱不够，等够钱了再来买吧。")
-                    return 0
-            elif choice == "2":
-                if player.money >= commodity["cookie"][1]:
-                    print(f"{self.name}:{commodity['cookie'][0]}的价格是{commodity['cookie'][1]}金币")
-                    time.sleep(1)
-                    player.Attack += commodity['cookie'][2]  # 玩家攻击力增加
-                    player.money -= commodity['cookie'][1]
-                    print(f"你购买了{commodity['cookie'][0]}，现在你的攻击力是{player.Attack}")
-                    print(f"{selfe.name}:欢迎下次光临。")
-                    return 0
-                else:
-                    print(f"{self.name}:你的钱不够，等够钱了再来买吧。")
-                    return 0
-        else:
-            print(f"{self.name}:好吧，下次再来吧。")
-            return 0
 
 
 def random_events(player):  # 根据概率给行动分配随机事件
@@ -260,17 +124,17 @@ def random_events(player):  # 根据概率给行动分配随机事件
     random_number = random.random()
     cumulative_probability = 0
     for event, probability in event_probability.items():  # 索引查看时间和概率
-        cumulative_probability += probability
-        if random_number < cumulative_probability:
+        cumulative_probability += probability  # 累计概率
+        if random_number < cumulative_probability:  # 当随机数小于累计概率时
             if event == "encounter_zombie":
                 encounter_zombie()
             elif event == "Nothing":
                 print("无事发生呢..\n继续向前走...")
-                time.sleep(4)
+                time.sleep(1)
             elif event == "encounter_chest":
                 print("发现了一个神秘的物资箱！")
                 open_treasure_box(player)
-                time.sleep(2)
+                time.sleep(1)
             elif event == "merchant":
                 print("遇到了一个商人...")
                 merchant = Merchant()
@@ -279,15 +143,17 @@ def random_events(player):  # 根据概率给行动分配随机事件
 
 
 def main():  #主函数
+    round_num = 0
     terminal.debug_out("游戏启动...", Debug_mod)
     print("欢迎游玩由Mr.KKCY开发的文本冒险游戏!")
     time.sleep(1)
-    read_tutorial = input("是否阅读教程？[Y/N]:")
-    if read_tutorial == "Y":
-        terminal.read_tutorial()
-    else:
-        print("那就开始吧！")
-        time.sleep(1)
+    if read_tutorial_mod:
+        read_tutorial = input("是否阅读教程？[Y/N]:")
+        if read_tutorial == "Y":
+            terminal.read_tutorial()
+        else:
+            print("那就开始吧！")
+            time.sleep(1)
     player = creat_player()  # 创建玩家对象
     input("按回车键开始冒险！")
     time.sleep(1)
@@ -295,6 +161,8 @@ def main():  #主函数
     time.sleep(2)
     while True:
         random_events(player)
+        round_num += 1
+        terminal.debug_out(f"第{round_num}回合", Debug_mod)
         if player.HP <= 0:
             print("游戏结束！")
             break

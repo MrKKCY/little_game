@@ -1,5 +1,7 @@
 # 末日迷途
-一个用python开发的文字冒险肉鸽小游戏(PS:程序设计课无聊写的)
+一个用python开发的文字冒险肉鸽小游戏<br>
+~~因为在程序设计课上真的很无聊，所以悄悄写了这个东西~~<br>
+
 
 ## 先来张梗图
 ![image](https://github.com/user-attachments/assets/21fe0afb-dddf-4100-bd9b-19b96b946c9f)

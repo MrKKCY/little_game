@@ -30,7 +30,7 @@ class Player(object):  # 玩家类，用于创建玩家对象
                     self.prop[prop][0] -= 1
                     print("你使用了一瓶饼干，增加了5点攻击力！")
                 print("剩余道具：")
-                for prop, count in self.prop.items():
+                for prop in self.prop:
                     print(f"{self.prop[prop][2]}: {self.prop[prop][1]}")
             else:
                 print("你没有这个道具了！")
@@ -72,8 +72,8 @@ class Player(object):  # 玩家类，用于创建玩家对象
             
             def use_prop():
                 print("你拥有的道具：")
-                for prop, count in self.prop.items():
-                    print(f"{prop[1][3]}: {prop[1]}")
+                for prop in self.prop:
+                    print(f"{self.prop[prop][2]}: {self.prop[prop][1]}")
                 prop_to_use = input("请输入你想要使用的道具：")
                 if prop_to_use == 1:
                     self.use_prop("cola")

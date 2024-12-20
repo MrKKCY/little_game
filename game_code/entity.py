@@ -13,6 +13,35 @@ class Player(object):  # 玩家类，用于创建玩家对象
         self.HP = HP
         self.Attack = Attack
         self.money = money
+        self.prop = {  # 玩家道具
+            "cola": [0, 20, "可乐"],
+            "cookie": [0, 5, "饼干"],
+        }
+
+    def use_prop(self, prop):  # 使用道具函数
+        if prop in self.prop:
+            if self.prop[prop][0] > 0:
+                if prop == "cola":
+                    self.HP += self.prop[prop][1]  # 增加20点血量
+                    self.prop[prop][0] -= 1
+                    print("你使用了一瓶可乐，恢复了20点血量！")
+                elif prop == "cookie":
+                    self.Attack += self.prop[prop][1]  # 增加5点攻击力
+                    self.prop[prop][0] -= 1
+                    print("你使用了一瓶饼干，增加了5点攻击力！")
+                print("剩余道具：")
+                for prop, count in self.prop.items():
+                    print(f"{self.prop[prop][2]}: {self.prop[prop][1]}")
+            else:
+                print("你没有这个道具了！")
+
+    def get_prop(self,prop):
+        use = input(f"你想要使用{prop}吗？[1/2]:")
+        if use == "1":
+            self.use_prop(prop)
+        elif use == "2":
+            print("你选择了不使用道具。")
+
 
     def talk(self, zombie, talks):  # 对话系统:支持导入字典进行对话
         """
@@ -20,7 +49,7 @@ class Player(object):  # 玩家类，用于创建玩家对象
         """
         pass
 
-    def attack(self, target):  
+    def attack(self, target):  # 攻击函数
         damage = 0
         if random.randint(0, 5) == 3:  # 随机选择攻击目标
             damage = 5//self.Attack  # 增加五分之一的伤害
@@ -38,6 +67,32 @@ class Player(object):  # 玩家类，用于创建玩家对象
         实现玩家与丧尸的战斗逻辑，采用回合制战斗，直到一方血量小于等于0为止。
         战斗结束后，玩家的血量不会恢复，而是保持战斗结束时的状态。
         """
+
+        def battleChoiceAndItemModule():  # 玩家选择行动函数
+            
+            def use_prop():
+                print("你拥有的道具：")
+                for prop, count in self.prop.items():
+                    print(f"{prop[1][3]}: {prop[1]}")
+                prop_to_use = input("请输入你想要使用的道具：")
+                if prop_to_use == 1:
+                    self.use_prop("cola")
+                elif prop_to_use == 2:
+                    self.use_prop("cookie")
+                
+
+
+            while True:
+                choice = input("请选择你的行动：1.攻击 2.使用道具\n")
+                if choice == "1":
+                    break
+                elif choice == "2":
+                    use_prop()
+                # elif choice == "3":
+                #     print("*你选择了逃跑！")
+                #     return "run"
+                else:
+                    print("无效的选择，请重新输入。")
 
         def player_attack():  # 玩家攻击函数
             self.attack(zombie)
@@ -76,6 +131,7 @@ class Player(object):  # 玩家类，用于创建玩家对象
         print(start_message)
 
         while self.HP > 0 and zombie.HP > 0:
+            battleChoiceAndItemModule()  # 玩家选择行动
             if first_attack == player_attack:
                 player_attack()
                 if zombie.HP > 0:  # 确保丧尸还活着
@@ -84,7 +140,6 @@ class Player(object):  # 玩家类，用于创建玩家对象
                 zombie_attack()
                 if self.HP > 0:  # 确保玩家还活着
                     first_attack = player_attack
-
     
     def command(self, command=0):  # 命令函数
         """
@@ -127,6 +182,7 @@ class Merchant(object):  # 商人类，用于创建商人对象
     def __init__(self):  # init 初始化商人信息函数
         self.name = "约翰·乔姆"
         self.meeting = False  # 商人是否与玩家相遇的标志
+        self.HP = 5000  # 商人的血量
 
     def trade(self, player):
         if self.meeting == False:

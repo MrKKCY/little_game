@@ -1,0 +1,26 @@
+{
+    "normal":{
+        "welcome":"Welcome to the text adventure game! by:Mr. KKCY",
+        "read_tutorial":"Do you want to read the tutorial? [1/2]:",
+        "start":"Let's get started!",
+        "enter_start":"Press enter to start the adventure....",
+        "error":"Typing error, please re-enter!",
+        "error_101":"The value you entered is not within the valid range, please re-enter!",
+        "set_name": "Please enter a name for your role:",
+        "dif_list" :[
+            "1. Easy difficulty: HP 50, Attack power 20",
+            "2. Normal difficulty: HP 35, attack power 15",
+            "3. Hard difficulty: HP 25, Attack Power 10",
+            "4. Nightmare difficulty: HP 10, Attack 5",
+            "5. Asia difficulty: HP 5, Attack Power 1"
+        ],
+        "dif_level":"The difficulty levels are as follows:",
+        "set_dif":"Please enter the difficulty of your choice(1-{len_dif}):"
+
+    },
+    "debug":{
+        "start":"Game launch... (Debug Mode Starts)",
+        "player_name": "player_name:{name}"
+    }
+
+}

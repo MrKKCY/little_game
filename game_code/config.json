@@ -1,4 +1,6 @@
 {
     "debug": true,
-    "read_tutorial": true
+    "read_tutorial": false,
+    "language": "zh_cn" ,
+    "MerchantRefreshRound": 10
 }
